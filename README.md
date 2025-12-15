@@ -1,58 +1,58 @@
-# Dự án cuối kỳ NLP HK1 25–26 — Fine-tune & Đánh giá Transformer (Việt)
+# Dự án cuối kỳ NLP — HK1 (2025–2026)
+Repo này tổng hợp 3 notebook fine-tune Transformer theo 3 kiến trúc phổ biến:
+- **Encoder-only** (BERT-style): phân loại văn bản (PhoBERT/ViSoBERT) trên ViHSD
+- **Encoder–Decoder** (seq2seq): tóm tắt tiếng Việt (ViT5)
+- **Decoder-only** (Causal LM): language modeling/sinh văn bản (Qwen3)
 
-Repo này tổng hợp 3 hướng tiếp cận Transformer:
-- **Encoder-only**: phân loại văn bản (PhoBERT / ViSoBERT)
-- **Encoder-decoder**: sinh văn bản có input rõ ràng (ViT5 – tóm tắt)
-- **Decoder-only**: sinh văn bản tự do / language modeling (Qwen3-0.6B – VietNews)
+> Repo public **chỉ code** (không public dataset/checkpoints). Xem mục “Dataset & Checkpoints”.
+ 
+## Dataset (ViHSD)
+Bài toán: Vietnamese Hate Speech Detection (3 nhãn: CLEAN / OFFENSIVE / HATE).
 
-Ngoài fine-tuning, repo còn có:
-- **Data Augmentation** bằng **synthetic data** sinh từ LLM
-- **Đánh giá truyền thống** (Accuracy/F1, ROUGE/BLEU/BERTScore, Perplexity…)
-- **LLM-based Evaluation** (Gemini/OpenAI chấm điểm chất lượng đầu ra)
-
-> Lưu ý: Repo chỉ public **code**. Dataset/checkpoint không push lên GitHub.
+Nguồn dataset:
+- HuggingFace: `sonlam1102/vihsd`. 
 
 ---
 
-## 1) Files trong repo
+## 1) Nội dung repo
 
-- `Bert_EncoderOnly.ipynb`  
-  Fine-tune **PhoBERT / ViSoBERT** cho bài toán **toxicity/hate speech classification** (3 lớp).
-  Có pipeline:
-  - baseline data
-  - data augmentation (synthetic)
-  - preprocessing (emoji/teencode)
-  - training + compare (Original vs Augmented)
-  - test + demo/API
-  - audit chất lượng synthetic
+### `Bert_EncoderOnly.ipynb`
+**Bài toán:** Vietnamese Hate Speech Detection (3 nhãn: CLEAN / OFFENSIVE / HATE).  
+**Mô hình:** PhoBERT / ViSoBERT (encoder-only).
 
-- `ViT5_encoderdecoder.ipynb`  
-  Fine-tune **ViT5 (encoder-decoder)** cho **tóm tắt tiếng Việt** (seq2seq).
-  Có:
-  - load dataset (HF)
-  - fine-tune + inference
-  - đánh giá ROUGE/BLEU/BERTScore
-  - LLM-based eval (Gemini/OpenAI)
-  - phần bổ sung: **Synthetic Data từ nhiều LLM** (paraphrase summary) + đánh giá chất lượng synthetic
+Pipeline chính (tóm tắt):
+- Load + chuẩn hóa dữ liệu
+- Tiền xử lý (emoji/teencode)
+- Fine-tune & đánh giá (Accuracy/F1)
+- (Tuỳ chọn) Synthetic data augmentation + so sánh kết quả
 
-- `Qwen3_DecoderOnly.ipynb`  
-  Fine-tune **Qwen/Qwen3-0.6B (decoder-only)** theo hướng **Causal LM** trên dữ liệu tin tức Việt (VietNews).
-  Có:
-  - build field text từ `title` + `content`
-  - tokenize + train
-  - đánh giá **loss/perplexity**
-  - sinh văn bản tiếng Việt từ prompt
-  - LLM-based eval (Gemini chấm 4 tiêu chí)
-  - tạo synthetic bằng paraphrase/viết lại tin tức
+### `ViT5_encoderdecoder.ipynb`
+**Bài toán:** Tóm tắt tiếng Việt (seq2seq).  
+**Mô hình:** ViT5 (encoder-decoder).
+
+Pipeline chính:
+- Load dataset (HuggingFace hoặc dữ liệu riêng)
+- Fine-tune + inference
+- Đánh giá: ROUGE / BLEU / BERTScore
+- (Tuỳ chọn) LLM-based evaluation & synthetic paraphrase
+
+### `Qwen3_DecoderOnly.ipynb`
+**Bài toán:** Causal Language Modeling / sinh văn bản.  
+**Mô hình:** Qwen3-0.6B (decoder-only).
+
+Pipeline chính:
+- Chuẩn hóa field text (title + content nếu dùng news)
+- Fine-tune causal LM
+- Đánh giá: loss / perplexity
+- Sinh văn bản theo prompt
+- (Tuỳ chọn) LLM-based scoring & synthetic data
 
 ---
 
 ## 2) Cài đặt môi trường
 
-Khuyến nghị chạy trên **Google Colab** (GPU).
-
-### Cài thư viện
 ```bash
-pip install -U transformers datasets accelerate sentencepiece evaluate sacrebleu rouge-score bert-score scikit-learn
-pip install -U underthesea py-vncorenlp emoji
+pip install -U transformers datasets accelerate sentencepiece evaluate
+pip install -U scikit-learn sacrebleu rouge-score bert-score
 pip install -U google-generativeai openai
+pip install -U underthesea emoji
